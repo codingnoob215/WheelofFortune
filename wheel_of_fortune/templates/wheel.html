@@ -1,1 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spin the Wheel</title>
+  <style>
+    body {
+      background-color: #001c3d;
+      color: white;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      overflow: hidden;
+      padding-top: 50px;
+    }
+
+    h1 {
+      color: #ffff66;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      margin: 0 auto;
+    }
+
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 6px solid #00ffcc;
+      position: relative;
+      overflow: hidden;
+      transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      background-color: #003366;
+      color: white;
+      text-align: center;
+      line-height: 180px;
+      font-size: 18px;
+      transform-origin: 100% 100%;
+      border-right: 2px solid #00ffcc;
+    }
+
+    .segment:nth-child(odd) {
+      background-color: #005599;
+    }
+
+    .arrow {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 40px solid #ff3333;
+    }
+
+    .controls {
+      margin-top: 40px;
+    }
+
+    button {
+      background-color: #00ffcc;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #00bbaa;
+    }
+
+    .result {
+      margin-top: 30px;
+      font-size: 32px;
+      color: #ffff66;
+    }
+
+    a {
+      color: #ffff66;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>SPIN THE WHEEL!</h1>
+  <div class="wheel-container">
+    <div class="arrow"></div>
+    <div class="wheel" id="wheel"></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="spinWheel()">SPIN</button>
+    <a href="/board"><button>BACK TO BOARD</button></a>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    const wheel = document.getElementById('wheel');
+    const resultText = document.getElementById('result');
+    const segments = [
+      "100", "200", "300", "400", "500", "600", "700", "800", "900",
+      "BANKRUPT", "LOSE A TURN", "1000"
+    ];
+
+    // Build wheel segments
+    const numSegments = segments.length;
+    const angleStep = 360 / numSegments;
+    for (let i = 0; i < numSegments; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'segment';
+      seg.style.transform = `rotate(${i * angleStep}deg) skewY(${90 - angleStep}deg)`;
+      seg.innerText = segments[i];
+      wheel.appendChild(seg);
+    }
+
+    let spinning = false;
+
+    function spinWheel() {
+      if (spinning) return;
+      spinning = true;
+
+      const randomIndex = Math.floor(Math.random() * segments.length);
+      const degrees = 360 * 5 + (360 / segments.length) * randomIndex; 
+      wheel.style.transform = `rotate(${degrees}deg)`;
+
+      setTimeout(() => {
+        const landed = segments[(segments.length - randomIndex) % segments.length];
+        resultText.textContent = "Result: " + landed;
+        
+        fetch(`/spin_result?value=${encodeURIComponent(landed)}`);
+
+        spinning = false;
+      }, 4500);
+    }
+  </script>
+
+</body>
+</html>
 
