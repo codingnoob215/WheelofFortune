@@ -1,5 +1,92 @@
-<h2> Category: {{ category }} </h2>
-<h1 id="puzzle">{{ puzzle}} </h1>
-<p>Guessed letters: <span id="guessed">{{ guessed|join(', ') }}</span></p>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wheel of Fortune Board</title>
+    <style>
+        body {
+            background-color: #001c3d;
+            color: white;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            padding-top: 40px;
+        }
+        .board {
+            display: inline-grid;
+            grid-template-columns: repeat(14, 40px);
+            gap: 5px;
+            background-color: #004080;
+            padding: 10px;
+            border: 4px solid #00ffcc;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .tile {
+            width: 40px;
+            height: 40px;
+            background-color: #001144;
+            color: white;
+            font-size: 24px;
+            line-height: 40px;
+            border: 2px solid #00ffcc;
+            text-transform: uppercase;
+        }
+        .tile.blank {
+            background-color: #000820;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            background-color: #00ffcc;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #00bbaa;
+        }
+        .info {
+            margin-top: 30px;
+            font-size: 18px;
+        }
+        .category {
+            font-size: 22px;
+            color: #ffff66;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
 
-<a href="{{ url_for('new_puzzle') }}">Next Puzzle</a>
+    <div class="category">Category: {{ category }}</div>
+
+    <div class="board">
+        {% for c in revealed %}
+            {% if c == ' ' %}
+                <div class="tile blank"></div>
+            {% else %}
+                <div class="tile">{{ c }}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <form action="/guess" method="POST">
+        <input type="text" name="letter" maxlength="1" placeholder="Enter a consonant" required>
+        <button type="submit">Guess</button>
+    </form>
+
+    <div class="controls">
+        <a href="/spin"><button>SPIN</button></a>
+        <button disabled>BUY VOWEL</button>
+        <a href="/new_round"><button>SOLVE / NEXT</button></a>
+    </div>
+
+    <div class="info">
+        Round: {{ round }} | Player: {{ player }} | ${{ money }}
+    </div>
+
+</body>
+</html>
