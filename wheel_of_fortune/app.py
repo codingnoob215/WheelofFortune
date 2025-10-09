@@ -6,7 +6,7 @@ app.secret_key = 'csc381fall'
 
 @app.route('/')
 def home(): 
-  return redirect(url_for('wheel')
+  return redirect(url_for('board')
 
 @app.route('/wheel')
 def wheel(): 
@@ -17,23 +17,29 @@ def spin():
   wheel_values = [100,200,300, 400, 'BANKRUPT', 400,500, 'MISS A TURN', 600, 700, 800, 900, 1000]
   result = random.choice(wheel_values)
   session['last_spin'] = result
-  return jsonify({'result': result}) 
+  return render_template('wheel.html', result=result)
+
+@app.route('/spin_result')
+def spin_result():
+  value = request.args.get('value')
+  session['last_spin'] = value
+  if value and value isdigit(): 
+    session['money'] += int(value)
+elif value == 'BANKRUPT': 
+  session['money'] = 0
+# miss a turn skips
+return ('', 204)
 
 @app.route('/guess', methods=['POST'])
-def guess(): letter = request.json.get('letter', '').upper()
-  if not letter or len(letter) != 1 or not letter.isalpha(): 
-    return jsonify({'error': 'Invalid guess'})
-
-guessed = session.get('guessed', []) 
-if letter not in guessed: 
-  guessed.append(letter) 
-  session['guessed'] = guessed
-
-puzzle = session['puzzle']
-revealed = ''.join([c if c == " " or c.upper() in guessed else '_' for c in puzzle])
-correct = letter in puzzle 
-return jsonify({'correct': correct, 'revealed': revealed, 'guessed': guessed}) 
-
+def guess(): 
+  letter = request.form['letter'].upper()
+  if letter and letter.isalpha(): 
+    if letter not in session['guessed']:
+     session['guessed'].append(letter)
+      if letter in session['puzzle']:
+      session['money'] += 500
+  return redirect(url_for('board'))
+  
 @app.route('/solve', methods=['POST']) 
 def solve(): 
   guess = request.json.get('guess', '').upper()
@@ -45,27 +51,31 @@ def solve():
 
 @app.route('/new_puzzle')
 def new_puzzle(): 
-  session.pop('puzzle', None)
-  session.pop('category', None)
-  session.pop('guessed', None)
+  category, phrase = get_random_puzzle()
+  session['puzzle'] = phrase.upper()
+  session['category'] = category
+  session['guessed'] = []
+  session['round'] += 1
   return redirect(url_for('board'))
 
 #Choose random puzzle when game starts 
 @app.route('/board') 
 def board(): 
   if 'puzzle' not in session: 
-    chosen = random.choice(PUZZLES)
-    session['puzzle'] = chosen['puzzle']
-    session['category'] = chosen['category']
+    category, phrase = get_random_puzzle()
+    session['puzzle'] = phrase.upper()
+    session['category'] = category
     session['guessed'] = []
+    session['money'] = 0
+    session[round] = 1
+    session['player'] = "PLAYER 1"
 
 puzzle = session['puzzle']
-category = session['category']
 guessed = session['guessed']
 
 #Shows letters that have been guessed correctly and produces the current visible puzzle
 revealed = ''.join([c if c = ' ' or c.upper() in guessed else '_' for c in puzzle])
-return render_template('board.html', puzzle = revealed, guessed = guessed)
+return render_template('board.html', category=session['category'],money=session['money'],round=session['round'],player=session['player'])
 
 if __name__ = '__main__': 
 app.run(debug=True)
