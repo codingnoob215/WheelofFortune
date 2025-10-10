@@ -3,7 +3,7 @@
 
 import random
 
-puzzles = {
+PUZZLES = {
     "Phrase": [
         "A GOOD FIT",
         "BACK TO BASICS",
@@ -42,6 +42,6 @@ puzzles = {
 }
 
 def get_random_puzzle():
-    category = random.choice(list(puzzles.keys()))
-    phrase = random.choice(puzzles[category])
+    category = random.choice(list(PUZZLES.keys()))
+    phrase = random.choice(PUZZLES[category])
     return category, phrase

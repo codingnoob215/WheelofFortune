@@ -1,34 +1,58 @@
 from flask import Flask, render_template, request, session, url_for, jsonify, redirect
 import random
+from puzzles import PUZZLES
 
 app = Flask(__name__) 
 app.secret_key = 'csc381fall'
 
+def get_new_puzzle():
+    category = random.choice(list(PUZZLES.keys()))
+    puzzle = random.choice(PUZZLES[category])
+    return category, puzzle.upper()
+
 @app.route('/')
 def home(): 
-  return redirect(url_for('board')
+  return redirect(url_for('board'))
 
 @app.route('/wheel')
 def wheel(): 
   return render_template('wheel.html')
 
-@app.route('/spin', methods=['POST']) 
+@app.route('/spin', methods=['GET','POST']) 
 def spin(): 
-  wheel_values = [100,200,300, 400, 'BANKRUPT', 400,500, 'MISS A TURN', 600, 700, 800, 900, 1000]
+  wheel_values = [100, 200, 300, 400, 'BANKRUPT', 400, 500, 'MISS A TURN', 600, 700, 800, 900, 1000]
   result = random.choice(wheel_values)
   session['last_spin'] = result
-  return render_template('wheel.html', result=result)
+
+    
+  if isinstance(result, int):
+        session['money'] = session.get('money', 0) + result
+        session['message'] = f"You spun ${result}!"
+  elif result == 'BANKRUPT':
+        session['money'] = 0
+        session['message'] = "BANKRUPT! You lost all your money!"
+  elif result == 'MISS A TURN':
+        session['message'] = "You missed your turn!"
+
+    
+  return redirect(url_for('board'))
 
 @app.route('/spin_result')
 def spin_result():
   value = request.args.get('value')
   session['last_spin'] = value
-  if value and value isdigit(): 
-    session['money'] += int(value)
-elif value == 'BANKRUPT': 
-  session['money'] = 0
-# miss a turn skips
-return ('', 204)
+  money = session.get('money', 0)
+  if value and value.isdigit(): 
+    session['money'] = money + int(value)
+    session['message'] = f"You spun ${value}!"
+  elif value == 'BANKRUPT':
+    session['money'] = 0
+    session['message'] = "BANKRUPT! You lost all of your money!"
+  elif value == 'LOSE A TURN':
+    session['message'] = 'You lost your turn.'
+  else: 
+    session['message'] = 'Invalid spin result.'
+    return ('', 204)
 
 @app.route('/guess', methods=['POST'])
 def guess(): 
@@ -36,7 +60,7 @@ def guess():
   if letter and letter.isalpha(): 
     if letter not in session['guessed']:
      session['guessed'].append(letter)
-      if letter in session['puzzle']:
+    if letter in session['puzzle']:
       session['money'] += 500
   return redirect(url_for('board'))
   
@@ -51,7 +75,7 @@ def solve():
 
 @app.route('/new_puzzle')
 def new_puzzle(): 
-  category, phrase = get_random_puzzle()
+  category, phrase = get_new_puzzle()
   session['puzzle'] = phrase.upper()
   session['category'] = category
   session['guessed'] = []
@@ -62,20 +86,18 @@ def new_puzzle():
 @app.route('/board') 
 def board(): 
   if 'puzzle' not in session: 
-    category, phrase = get_random_puzzle()
+    category, phrase = get_new_puzzle()
     session['puzzle'] = phrase.upper()
     session['category'] = category
     session['guessed'] = []
     session['money'] = 0
-    session[round] = 1
+    session['round'] = 1
     session['player'] = "PLAYER 1"
-
-puzzle = session['puzzle']
-guessed = session['guessed']
-
+  puzzle = session['puzzle']
+  guessed = session['guessed']
 #Shows letters that have been guessed correctly and produces the current visible puzzle
-revealed = ''.join([c if c = ' ' or c.upper() in guessed else '_' for c in puzzle])
-return render_template('board.html', category=session['category'],money=session['money'],round=session['round'],player=session['player'])
+  revealed = ''.join([c if c == ' ' or c.upper() in guessed else '_' for c in puzzle])
+  return render_template('board.html', category=session['category'],money=session['money'],round=session['round'],player=session['player'])
 
-if __name__ = '__main__': 
-app.run(debug=True)
+if __name__ == '__main__': 
+ app.run(debug=True)
