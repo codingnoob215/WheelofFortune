@@ -24,14 +24,16 @@
             width: 40px;
             height: 40px;
             background-color: #001144;
-            color: white;
+            color: #ffff66;
             font-size: 24px;
             line-height: 40px;
             border: 2px solid #00ffcc;
             text-transform: uppercase;
+            font-weight: bold;
         }
         .tile.blank {
             background-color: #000820;
+            border: none;
         }
         .controls {
             margin-top: 20px;
@@ -61,17 +63,23 @@
 </head>
 <body>
 
+    <h1>WHEEL OF FORTUNE</h1>
+
     <div class="category">Category: {{ category }}</div>
+
 
     <div class="board">
         {% for c in revealed %}
             {% if c == ' ' %}
                 <div class="tile blank"></div>
+            {% elif c == '_' %}
+                <div class="tile" style="color:#005577;">_</div>
             {% else %}
                 <div class="tile">{{ c }}</div>
             {% endif %}
         {% endfor %}
     </div>
+
 
     <form action="/guess" method="POST">
         <input type="text" name="letter" maxlength="1" placeholder="Enter a consonant" required>
@@ -79,9 +87,15 @@
     </form>
 
     <div class="controls">
-        <a href="/spin"><button>SPIN</button></a>
-        <button disabled>BUY VOWEL</button>
-        <a href="/new_round"><button>SOLVE / NEXT</button></a>
+        <a href="/wheel"><button>SPIN</button></a>
+        <form action="/buy_vowel" method="POST" style="display:inline;">
+            <input type="text" name="vowel" maxlength="1" placeholder="Buy a vowel (A, E, I, O, U)" required>
+            <button type="submit">BUY VOWEL</button>
+        </form>
+        <form action="/solve" method="POST" style="display:inline;">
+            <input type="text" name="guess" placeholder="Solve the puzzle" required>
+            <button type="submit">SOLVE</button>
+        </form>
     </div>
 
     <div class="info">
