@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, url_for, jsonify, redirect
+from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
 import random
 from puzzles import PUZZLES
 
@@ -75,6 +75,9 @@ def spin_result():
 def guess(): 
   letter = request.form['letter'].upper()
   if letter and letter.isalpha():
+    if letter in "AEIOU":
+       flash("No vowels allowed", 'error')
+       return redirect(url_for('board'))
     if letter not in session['guessed']:
         session['guessed'].append(letter)
         session.modified = True
