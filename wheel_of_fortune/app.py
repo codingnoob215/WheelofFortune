@@ -22,11 +22,11 @@ def wheel():
 def buy_vowel():
     vowel = request.form['vowel'].upper()
     if vowel not in "AEIOU":
-        session['message'] = "That's not a vowel!"
+        flash("That's not a vowel!",'error')
         return redirect(url_for('board'))
 
     if session.get('money', 0) < 250:
-        session['message'] = "Not enough money to buy a vowel!"
+        flash("Not enough money to buy a vowel!",'error')
         return redirect(url_for('board'))
 
     if vowel not in session['guessed']:
@@ -44,14 +44,12 @@ def spin():
     
   if isinstance(result, int):
         session['money'] = session.get('money', 0) + result
-        session['message'] = f"You spun ${result}!"
+        flash(f"You spun ${result}!",'info')
   elif result == 'BANKRUPT':
         session['money'] = 0
-        session['message'] = "BANKRUPT! You lost all your money!"
+       flash("BANKRUPT! You lost all your money!",'info')
   elif result == 'MISS A TURN':
-        session['message'] = "You missed your turn!"
-
-    
+       flash("You missed your turn!",'info')
   return render_template('wheel.html', result=result)
 
 @app.route('/spin_result')
@@ -61,14 +59,15 @@ def spin_result():
   money = session.get('money', 0)
   if value and value.isdigit(): 
     session['money'] = money + int(value)
-    session['message'] = f"You spun ${value}!"
+    flash(f"You spun ${value}!",'info')
   elif value == 'BANKRUPT':
     session['money'] = 0
-    session['message'] = "BANKRUPT! You lost all of your money!"
+    flash("BANKRUPT! You lost all your money!",'info')
   elif value == 'LOSE A TURN':
-    session['message'] = 'You lost your turn.'
+    flash("You lost your turn!",'info')
   else: 
-    session['message'] = 'Invalid spin result.'
+    flash("Invalid spin result.",'info')
+
     return ('', 204)
 
 @app.route('/guess', methods=['POST'])
@@ -93,10 +92,10 @@ def solve():
   guess = request.form.get('guess', '').upper()
   if guess == session.get('puzzle'): 
     session['bank'] = session.get('bank', 0) + 1000
-    session['message'] = "Great job! You solved the puzzle!"
+    flash("Great job! You solved the puzzle!", 'success')
     return redirect(url_for('new puzzle'))
   else: 
-    session['message'] = "Sorry, that is incorrect."
+    flash("Sorry, that is incorrect.", 'info')
     return redirect(url_for('board'))
 
 @app.route('/new_puzzle')
