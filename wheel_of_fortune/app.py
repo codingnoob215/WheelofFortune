@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, url_for, jsonify, redirect
+from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
 import random
 from puzzles import PUZZLES
 
@@ -57,24 +57,34 @@ def spin():
 @app.route('/spin_result')
 def spin_result():
   value = request.args.get('value')
+  if not value:
+     return jsonify({'error': 'No spin value recieved'}), 400
+  
   session['last_spin'] = value
   money = session.get('money', 0)
+
   if value and value.isdigit(): 
     session['money'] = money + int(value)
     session['message'] = f"You spun ${value}!"
   elif value == 'BANKRUPT':
     session['money'] = 0
     session['message'] = "BANKRUPT! You lost all of your money!"
-  elif value == 'LOSE A TURN':
+  elif value in  ('LOSE A TURN', 'MISS A TURN'):
     session['message'] = 'You lost your turn.'
   else: 
     session['message'] = 'Invalid spin result.'
-    return ('', 204)
+
+  session.modified = True
+
+  return jsonify({'result' : value, 'money' : session['money']})
 
 @app.route('/guess', methods=['POST'])
 def guess(): 
   letter = request.form['letter'].upper()
   if letter and letter.isalpha():
+    if letter in "AEIOU":
+       flash("No vowels allowed", 'error')
+       return redirect(url_for('board'))
     if letter not in session['guessed']:
         session['guessed'].append(letter)
         session.modified = True
@@ -91,7 +101,7 @@ def solve():
   if guess == session.get('puzzle'): 
     session['bank'] = session.get('bank', 0) + 1000
     session['message'] = "Great job! You solved the puzzle!"
-    return redirect(url_for('new puzzle'))
+    return redirect(url_for('new_puzzle'))
   else: 
     session['message'] = "Sorry, that is incorrect."
     return redirect(url_for('board'))
