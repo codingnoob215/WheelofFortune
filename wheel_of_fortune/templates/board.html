@@ -9,6 +9,50 @@
             font-family: 'Courier New', monospace;
             text-align: center;
             padding-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+        }
+        .ad-column {
+            width: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin-top: 50px;
+        }
+        .ad-frame {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 220px;     
+            height: 220px;    
+            border: 4px solid #00ffcc;
+            border-radius: 10px;
+            background-color: #001144;
+            box-shadow: 0 0 20px #00ffcc;
+            overflow: hidden;
+        }
+
+        #adLeft {
+            left: 40px;       
+        }
+
+        #adRight {
+            right: 40px;     
+        }
+
+        .ad-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;   
+            transition: opacity 0.8s ease-in-out;
+            background-color: #000; 
+        }
+        .main-content {
+            flex-grow: 1;
+            text-align: center;
         }
         .board {
             display: inline-grid;
@@ -93,6 +137,14 @@
 </head>
 <body>
 
+<div class="ad-column">
+    <div class="ad-frame">
+      <img id="leftAd" src="{{ url_for('static', filename='images/ads/ad1.png') }}" alt="Ad">
+    </div>
+  </div>
+
+  <div class="main-content">
+
    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -149,6 +201,55 @@
     <div class="info">
         Round: {{ round }} | Player: {{ player }} | ${{ money }}
     </div>
+</div>
 
+<div class="ad-column">
+    <div class="ad-frame">
+      <img id="rightAd" src="{{ url_for('static', filename='images/ads/ad6.png') }}" alt="Ad">
+    </div>
+  </div>
+
+ <script>
+  const leftAd = document.getElementById('leftAd');
+  const rightAd = document.getElementById('rightAd');
+
+  const ads = [
+    "{{ url_for('static', filename='images/ads/ad1.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad2.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad3.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad4.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad5.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad6.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad7.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad8.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad9.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad10.jpg') }}"
+  ];
+
+  let leftIndex = 0;
+  let rightIndex = Math.floor(ads.length / 2);
+
+  function cycleAds() {
+    leftAd.style.opacity = 0;
+    rightAd.style.opacity = 0;
+
+    setTimeout(() => {
+      leftIndex = (leftIndex + 1) % ads.length;
+      rightIndex = (rightIndex + 1) % ads.length;
+
+      leftAd.src = ads[leftIndex];
+      rightAd.src = ads[rightIndex];
+
+      leftAd.style.opacity = 1;
+      rightAd.style.opacity = 1;
+    }, 600);
+  }
+
+  
+  leftAd.src = ads[leftIndex];
+  rightAd.src = ads[rightIndex];
+
+  setInterval(cycleAds, 4000);
+</script>
 </body>
 </html>
