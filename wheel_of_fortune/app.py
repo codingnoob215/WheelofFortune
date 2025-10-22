@@ -1,4 +1,5 @@
 from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
+from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
 import random
 from puzzles import PUZZLES
 
@@ -22,11 +23,11 @@ def wheel():
 def buy_vowel():
     vowel = request.form['vowel'].upper()
     if vowel not in "AEIOU":
-        session['message'] = "That's not a vowel!"
+        flash("That's not a vowel!",'error')
         return redirect(url_for('board'))
 
     if session.get('money', 0) < 250:
-        session['message'] = "Not enough money to buy a vowel!"
+        flash("Not enough money to buy a vowel!",'error')
         return redirect(url_for('board'))
 
     if vowel not in session['guessed']:
@@ -44,14 +45,12 @@ def spin():
     
   if isinstance(result, int):
         session['money'] = session.get('money', 0) + result
-        session['message'] = f"You spun ${result}!"
+        flash(f"You spun ${result}!",'info')
   elif result == 'BANKRUPT':
         session['money'] = 0
-        session['message'] = "BANKRUPT! You lost all your money!"
+        flash("BANKRUPT! You lost all your money!",'info')
   elif result == 'MISS A TURN':
-        session['message'] = "You missed your turn!"
-
-    
+        flash("You missed your turn!",'info')
   return render_template('wheel.html', result=result)
 
 @app.route('/spin_result')
@@ -65,13 +64,19 @@ def spin_result():
 
   if value and value.isdigit(): 
     session['money'] = money + int(value)
-    session['message'] = f"You spun ${value}!"
+    flash(f"You spun ${value}!",'info')
   elif value == 'BANKRUPT':
     session['money'] = 0
+    flash("BANKRUPT! You lost all your money!",'info')
+  elif value == 'LOSE A TURN':
+    flash("You lost your turn!",'info')
     session['message'] = "BANKRUPT! You lost all of your money!"
   elif value in  ('LOSE A TURN', 'MISS A TURN'):
     session['message'] = 'You lost your turn.'
   else: 
+    flash("Invalid spin result.",'info')
+
+    return ('', 204)
     session['message'] = 'Invalid spin result.'
 
   session.modified = True
@@ -82,6 +87,9 @@ def spin_result():
 def guess(): 
   letter = request.form['letter'].upper()
   if letter and letter.isalpha():
+    if letter in "AEIOU":
+       flash("No vowels allowed", 'error')
+       return redirect(url_for('board'))
     if letter in "AEIOU":
        flash("No vowels allowed", 'error')
        return redirect(url_for('board'))
@@ -100,10 +108,12 @@ def solve():
   guess = request.form.get('guess', '').upper()
   if guess == session.get('puzzle'): 
     session['bank'] = session.get('bank', 0) + 1000
+    flash("Great job! You solved the puzzle!", 'success')
+    return redirect(url_for('new puzzle'))
     session['message'] = "Great job! You solved the puzzle!"
     return redirect(url_for('new_puzzle'))
   else: 
-    session['message'] = "Sorry, that is incorrect."
+    flash("Sorry, that is incorrect.", 'info')
     return redirect(url_for('board'))
 
 @app.route('/new_puzzle')
