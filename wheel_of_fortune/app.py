@@ -1,4 +1,5 @@
 from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
+from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
 import random
 from puzzles import PUZZLES
 
@@ -47,16 +48,20 @@ def spin():
         flash(f"You spun ${result}!",'info')
   elif result == 'BANKRUPT':
         session['money'] = 0
-       flash("BANKRUPT! You lost all your money!",'info')
+        flash("BANKRUPT! You lost all your money!",'info')
   elif result == 'MISS A TURN':
-       flash("You missed your turn!",'info')
+        flash("You missed your turn!",'info')
   return render_template('wheel.html', result=result)
 
 @app.route('/spin_result')
 def spin_result():
   value = request.args.get('value')
+  if not value:
+     return jsonify({'error': 'No spin value recieved'}), 400
+  
   session['last_spin'] = value
   money = session.get('money', 0)
+
   if value and value.isdigit(): 
     session['money'] = money + int(value)
     flash(f"You spun ${value}!",'info')
@@ -65,15 +70,26 @@ def spin_result():
     flash("BANKRUPT! You lost all your money!",'info')
   elif value == 'LOSE A TURN':
     flash("You lost your turn!",'info')
+    session['message'] = "BANKRUPT! You lost all of your money!"
+  elif value in  ('LOSE A TURN', 'MISS A TURN'):
+    session['message'] = 'You lost your turn.'
   else: 
     flash("Invalid spin result.",'info')
 
     return ('', 204)
+    session['message'] = 'Invalid spin result.'
+
+  session.modified = True
+
+  return jsonify({'result' : value, 'money' : session['money']})
 
 @app.route('/guess', methods=['POST'])
 def guess(): 
   letter = request.form['letter'].upper()
   if letter and letter.isalpha():
+    if letter in "AEIOU":
+       flash("No vowels allowed", 'error')
+       return redirect(url_for('board'))
     if letter in "AEIOU":
        flash("No vowels allowed", 'error')
        return redirect(url_for('board'))
@@ -94,6 +110,8 @@ def solve():
     session['bank'] = session.get('bank', 0) + 1000
     flash("Great job! You solved the puzzle!", 'success')
     return redirect(url_for('new puzzle'))
+    session['message'] = "Great job! You solved the puzzle!"
+    return redirect(url_for('new_puzzle'))
   else: 
     flash("Sorry, that is incorrect.", 'info')
     return redirect(url_for('board'))
