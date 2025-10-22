@@ -1,5 +1,4 @@
 from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
-from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
 import random
 from puzzles import PUZZLES
 
