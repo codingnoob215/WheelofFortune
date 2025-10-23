@@ -1,7 +1,10 @@
 from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
-from flask import Flask, flash, render_template, request, session, url_for, jsonify, redirect
 import random
+import bonus_puzzles
+print("Loaded bonus_puzzles from:", bonus_puzzles.__file__)
 from puzzles import PUZZLES
+from bonus_puzzles import get_bonus_puzzle
+
 
 app = Flask(__name__) 
 app.secret_key = 'csc381fall'
@@ -106,15 +109,94 @@ def guess():
 @app.route('/solve', methods=['POST']) 
 def solve(): 
   guess = request.form.get('guess', '').upper()
-  if guess == session.get('puzzle'): 
+  puzzle = session.get('puzzle','').upper()
+  if guess == puzzle: 
     session['bank'] = session.get('bank', 0) + 1000
     flash("Great job! You solved the puzzle!", 'success')
-    return redirect(url_for('new puzzle'))
-    session['message'] = "Great job! You solved the puzzle!"
-    return redirect(url_for('new_puzzle'))
+    session['bank'] = session.get('bank', 0) + 1000
+    session['bonus_eligible'] = True
+    session['bonus_player'] = session.get('player', 'Player 1')
+    return redirect(url_for('bonus_intro'))
   else: 
     flash("Sorry, that is incorrect.", 'info')
     return redirect(url_for('board'))
+
+@app.route('/bonus_intro')
+def bonus_intro():
+   categories = ["Things", "Places", "People", "Events", "Phrases"]
+   return render_template('bonus_intro.html', categories=categories)
+
+@app.route('/start_bonus', methods=['POST'])
+def start_bonus():
+   category = request.form['category']
+   prizes = ["$5,000", "$10,000", "$25,000", "Luxury Car", "Vacation", "New House", "Dining Set", "Jetski"]
+   prize = random.choice(prizes)
+   bonus_category, puzzle = get_bonus_puzzle(category)
+   revealed = ''.join(c if c.upper() in "RSTLNE" else '_' for c in puzzle.upper()) #same as in board
+   
+   session['bonus_puzzle'] = puzzle
+   session['bonus_revealed'] = revealed
+   session['bonus_prize'] = prize
+   session['bonus_category'] = bonus_category
+
+   return render_template('bonus_board.html', category=bonus_category,revealed=revealed,prize=prize)
+
+@app.route('/bonus_guess', methods=['POST'])
+def bonus_guess():
+    letter = request.form.get('letter', '').upper().strip()
+
+    if not letter or len(letter) != 1 or not letter.isalpha():
+        flash("Please enter a valid letter before submitting.", "error")
+        return redirect(url_for('bonus_board'))
+
+    guessed = session.get('bonus_guessed', [])
+    if letter in guessed or letter in "RSTLNE":
+        flash("You already used that letter!", "info")
+        return redirect(url_for('bonus_board'))
+
+    guessed.append(letter)
+    session['bonus_guessed'] = guessed
+
+    puzzle = session.get('bonus_puzzle', '')
+    revealed = ''.join([
+        c if c == ' ' or c.upper() in guessed or c.upper() in "RSTLNE" else '_'
+        for c in puzzle
+    ])
+    session['bonus_revealed'] = revealed
+    session.modified = True
+
+    if '_' not in revealed:
+        flash("You solved the bonus puzzle and won {session['bonus_prize']}!", "success")
+        session.clear()  
+        return redirect(url_for('board'))
+
+    return redirect(url_for('bonus_board'))
+
+@app.route('/bonus_solve', methods=['POST'])
+def bonus_solve():
+    guess = request.form.get('guess', '').upper().strip()
+    puzzle = session.get('bonus_puzzle', '').upper()
+    prize = session.get('bonus_prize', '')
+
+    if not puzzle:
+        flash("No bonus puzzle in progress.", "error")
+        return redirect(url_for('board'))
+
+    if guess == puzzle:
+        flash(f"Congratulations! You solved the bonus puzzle and won {prize}!", "success")
+        session.clear()
+        return redirect(url_for('board'))
+    else:
+        flash("Sorry, that's not correct.", "info")
+        return redirect(url_for('bonus_board'))
+
+@app.route('/bonus_board')
+def bonus_board():
+    if 'bonus_puzzle' not in session:
+        flash("No bonus round in progress.", "error")
+        return redirect(url_for('board'))
+    return render_template('bonus_board.html',category=session['bonus_category'],revealed=session['bonus_revealed'],prize=session['bonus_prize'])
+
 
 @app.route('/new_puzzle')
 def new_puzzle(): 
@@ -125,6 +207,14 @@ def new_puzzle():
   session['money'] = 0
   session['round'] = session.get('round', 0)+1
   return redirect(url_for('board'))
+
+#clear cache on reset
+@app.before_request
+def clear_session_on_restart():
+    if not session.get('initialized'):
+        session.clear()
+        session['initialized'] = True
+
 
 #Choose random puzzle when game starts 
 @app.route('/board') 
