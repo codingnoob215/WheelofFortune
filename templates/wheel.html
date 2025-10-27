@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spin the Wheel</title>
+  <style>
+  body {
+    background-color: #001c3d;
+    color: white;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    overflow: hidden;
+    padding-top: 50px;
+  }
+
+  h1 {
+    color: #ffff66;
+  }
+
+  .wheel-container {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 0 auto;
+  }
+
+  .wheel {
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    border: 6px solid #00ffcc;
+    position: relative;
+    background: conic-gradient(
+      #005599 0deg 30deg,
+      #003366 30deg 60deg,
+      #005599 60deg 90deg,
+      #003366 90deg 120deg,
+      #005599 120deg 150deg,
+      #003366 150deg 180deg,
+      #005599 180deg 210deg,
+      #003366 210deg 240deg,
+      #005599 240deg 270deg,
+      #003366 270deg 300deg,
+      #005599 300deg 330deg,
+      #003366 330deg 360deg
+    );
+    transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .arrow {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 40px solid #ff3333;
+  }
+
+  .controls {
+    margin-top: 40px;
+  }
+
+  button {
+    background-color: #00ffcc;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  button:hover {
+    background-color: #00bbaa;
+  }
+
+  .result {
+    margin-top: 30px;
+    font-size: 28px;
+    color: #ffff66;
+  }
+
+  .label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+  }
+</style>
+</head>
+<body>
+
+  <h1>SPIN THE WHEEL!</h1>
+  <div class="wheel-container">
+    <div class="arrow"></div>
+    <div class="wheel" id="wheel"></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="spinWheel()">SPIN</button>
+    <a href="/board"><button>BACK TO BOARD</button></a>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <script>
+const wheel = document.getElementById('wheel');
+const resultText = document.getElementById('result');
+const segments = [
+  "100", "200", "300", "400", "500", "600", "700", "800", "900",
+  "BANKRUPT", "LOSE A TURN", "1000"
+];
+const numSegments = segments.length;
+const angleStep = 360 / numSegments;
+
+for (let i = 0; i < numSegments; i++) {
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = segments[i];
+  label.style.transform = `rotate(${i * angleStep + angleStep / 2}deg) translate(140px) rotate(90deg)`;
+  wheel.appendChild(label);
+}
+
+let spinning = false;
+
+function spinWheel() {
+  if (spinning) return;
+  spinning = true;
+
+  const targetIndex = Math.floor(Math.random() * numSegments);
+  const fullSpins = 5;
+  const targetCenterAngle = targetIndex * angleStep + angleStep / 2;
+  const arrowAngle = 270;
+  let neededRotation = (arrowAngle - targetCenterAngle) % 360;
+  if (neededRotation < 0) neededRotation += 360;
+  const jitter = Math.random() * (angleStep * 0.6) - (angleStep * 0.3);
+  neededRotation += jitter;
+  const degrees = fullSpins * 360 + neededRotation;
+  wheel.style.transform = `rotate(${degrees}deg)`;
+
+  setTimeout(() => {
+    const finalRotation = degrees % 360;
+    let angleAtArrow = (arrowAngle - finalRotation) % 360;
+    if (angleAtArrow < 0) angleAtArrow += 360;
+    const landedIndex = Math.floor(angleAtArrow / angleStep) % numSegments;
+    const landed = segments[landedIndex];
+    resultText.textContent = `Result: ${landed}`;
+
+    fetch(`/spin_result?value=${encodeURIComponent(landed)}`)
+      .then(response => response.json())
+      .then(data => {
+        resultText.textContent = `Result: ${data.result} | Money: $${data.money}`;
+        setTimeout(() => { window.location.href = "/board"; }, 1800);
+      })
+      .catch(err => {
+        console.error('Error sending spin result:', err);
+        setTimeout(() => { window.location.href = "/board"; }, 800);
+      });
+
+    spinning = false;
+  }, 4400);
+}
+</script>
+</body>
+</html>
+
