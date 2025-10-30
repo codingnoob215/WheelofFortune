@@ -1,0 +1,9 @@
+<h1>Bonus Puzzle: {{ category }}</h1>
+<div class="board">{{ revealed }}</div>
+<form action="/reveal_bonus" method="POST">
+  <label>Pick 3 consonants:</label>
+  <input type="text" name="consonants" maxlength="3" required><br>
+  <label>Pick 1 vowel:</label>
+  <input type="text" name="vowel" maxlength="1" required><br>
+  <button type="submit">Reveal Letters</button>
+</form>

@@ -1,0 +1,7 @@
+<h1>Bonus Round!</h1>
+<p>Choose your category:</p>
+<form action="/start_bonus" method="POST">
+  {% for c in categories %}
+  <button name="category" value="{{ c }}">{{ c }}</button>
+  {% endfor %}
+</form>

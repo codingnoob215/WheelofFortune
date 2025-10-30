@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to Wheel of Fortune</title>
+    <style>
+        body {
+            background-color: #001c3d;
+            color: white;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            padding-top: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+        }
+        .ad-column {
+            width: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            margin-top: 50px;
+        }
+        .ad-frame {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 220px;     
+            height: 220px;    
+            border: 4px solid #00ffcc;
+            border-radius: 10px;
+            background-color: #001144;
+            box-shadow: 0 0 20px #00ffcc;
+            overflow: hidden;
+        }
+        #adLeft { left: 40px; }
+        #adRight { right: 40px; }
+        .ad-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;   
+            transition: opacity 0.8s ease-in-out;
+            background-color: #000; 
+        }
+        .main-content {
+            flex-grow: 1;
+            text-align: center;
+            background-color: #003366;
+            padding: 30px;
+            border-radius: 10px;
+            border: 4px solid #00ffcc;
+        }
+        h1 {
+            color: #ffff66;
+            font-size: 36px;
+        }
+        .player-inputs {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        .player-box {
+            padding: 20px;
+        }
+        label {
+            display: block;
+            font-size: 20px;
+            color: #00ffcc;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            background-color: #001144;
+            border: 2px solid #00ffcc;
+            color: white;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        button {
+            background-color: #00ffcc;
+            border: none;
+            padding: 15px 30px;
+            margin-top: 40px;
+            font-weight: bold;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #00bbaa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ad-column">
+    <div class="ad-frame" id="adLeft">
+      <img id="leftAd" src="{{ url_for('static', filename='images/ads/ad3.jpg') }}" alt="Ad">
+    </div>
+</div>
+
+<div class="main-content">
+    <h1>WELCOME TO WHEEL OF FORTUNE!</h1>
+    <p>Enter player names to begin:</p>
+    <form action="/start_game" method="POST">
+        <div class="player-inputs">
+            <div class="player-box">
+                <label for="player1">Player 1</label>
+                <input type="text" id="player1" name="player1" required>
+            </div>
+            <div class="player-box">
+                <label for="player2">Player 2</label>
+                <input type="text" id="player2" name="player2" required>
+            </div>
+            <div class="player-box">
+                <label for="player3">Player 3</label>
+                <input type="text" id="player3" name="player3" required>
+            </div>
+        </div>
+        <button type="submit">START GAME</button>
+    </form>
+</div>
+
+<div class="ad-column">
+    <div class="ad-frame" id="adRight">
+      <img id="rightAd" src="{{ url_for('static', filename='images/ads/ad8.jpg') }}" alt="Ad">
+    </div>
+</div>
+
+<script>
+  // Simple ad rotator for the homepage
+  const leftAd = document.getElementById('leftAd');
+  const rightAd = document.getElementById('rightAd');
+  const ads = [
+    "{{ url_for('static', filename='images/ads/ad1.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad2.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad3.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad4.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad5.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad6.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad7.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad8.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad9.jpg') }}",
+    "{{ url_for('static', filename='images/ads/ad10.jpg') }}"
+  ];
+  let leftIndex = 2;
+  let rightIndex = 7;
+  function cycleAds() {
+    leftAd.style.opacity = 0;
+    rightAd.style.opacity = 0;
+    setTimeout(() => {
+      leftIndex = (leftIndex + 1) % ads.length;
+      rightIndex = (rightIndex + 1) % ads.length;
+      if (leftIndex === rightIndex) rightIndex = (rightIndex + 1) % ads.length; // Ensure different ads
+      leftAd.src = ads[leftIndex];
+      rightAd.src = ads[rightIndex];
+      leftAd.style.opacity = 1;
+      rightAd.style.opacity = 1;
+    }, 600);
+  }
+  setInterval(cycleAds, 4000);
+</script>
+
+</body>
+</html>
