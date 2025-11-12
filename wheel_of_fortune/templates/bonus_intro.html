@@ -1,7 +1,40 @@
-<h1>Bonus Round!</h1>
-<p>Choose your category:</p>
-<form action="/start_bonus" method="POST">
-  {% for c in categories %}
-  <button name="category" value="{{ c }}">{{ c }}</button>
-  {% endfor %}
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bonus Round!</title>
+  <style>
+    body {
+      background-color: #001c3d;
+      color: white;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      padding-top: 100px;
+    }
+    h1 {
+      color: #ffff66;
+    }
+    button {
+      background-color: #00ffcc;
+      border: none;
+      padding: 12px 24px;
+      margin: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #00bbaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bonus Round!</h1>
+  <p>Choose your category:</p>
+  <form action="/start_bonus" method="POST">
+    {% for c in categories %}
+    <button name="category" value="{{ c }}">{{ c }}</button>
+    {% endfor %}
+  </form>
+</body>
+</html>

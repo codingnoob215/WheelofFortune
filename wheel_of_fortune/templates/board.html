@@ -1,255 +1,369 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Wheel of Fortune Board</title>
     <style>
-        body {
-            background-color: #001c3d;
-            color: white;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-            padding-top: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 40px;
-        }
-        .ad-column {
-            width: 180px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            margin-top: 50px;
-        }
-        .ad-frame {
-            position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 220px;     
-            height: 220px;    
-            border: 4px solid #00ffcc;
-            border-radius: 10px;
-            background-color: #001144;
-            box-shadow: 0 0 20px #00ffcc;
-            overflow: hidden;
-        }
+      body {
+        background-color: #001c3d;
+        color: white;
+        font-family: "Courier New", monospace;
+        text-align: center;
+        padding-top: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 40px;
+      }
+      .ad-column {
+        width: 180px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        margin-top: 50px;
+      }
+      .ad-frame {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 220px;
+        height: 220px;
+        border: 4px solid #00ffcc;
+        border-radius: 10px;
+        background-color: #001144;
+        box-shadow: 0 0 20px #00ffcc;
+        overflow: hidden;
+      }
 
-        #adLeft {
-            left: 40px;       
-        }
+      #adLeft {
+        left: 40px;
+      }
 
-        #adRight {
-            right: 40px;     
-        }
+      #adRight {
+        right: 40px;
+      }
 
-        .ad-frame img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;   
-            transition: opacity 0.8s ease-in-out;
-            background-color: #000; 
-        }
-        .main-content {
-            flex-grow: 1;
-            text-align: center;
-        }
-        .board {
-            display: inline-grid;
-            grid-template-columns: repeat(14, 40px);
-            gap: 5px;
-            background-color: #004080;
-            padding: 10px;
-            border: 4px solid #00ffcc;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-        .tile {
-            width: 40px;
-            height: 40px;
-            background-color: #001144;
-            color: #ffff66;
-            font-size: 24px;
-            line-height: 40px;
-            border: 2px solid #00ffcc;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-        .tile.blank {
-            background-color: #000820;
-            border: none;
-        }
-        .controls {
-            margin-top: 20px;
-        }
-        button {
-            background-color: #00ffcc;
-            border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #00bbaa;
-        }
-        .info {
-            margin-top: 30px;
-            font-size: 18px;
-        }
-        .category {
-            font-size: 22px;
-            color: #ffff66;
-            margin-bottom: 10px;
-        }
+      .ad-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: opacity 0.8s ease-in-out;
+        background-color: #000;
+      }
 
-         .game-alert {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle at top, #ff0040, #990022);
-            border: 4px solid #ffff66;
-            color: #fff;
-            font-size: 26px;
-            font-weight: bold;
-            padding: 20px 40px;
-            border-radius: 15px;
-            box-shadow: 0 0 25px #ff0066, 0 0 50px #ffff66;
-            z-index: 9999;
-            animation: popIn 0.4s ease forwards;
-        }
+      .main-content {
+        flex-grow: 1;
+        text-align: center;
+      }
 
-        @keyframes popIn {
-            from { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
+      .board {
+        display: inline-grid;
+        grid-template-columns: repeat(14, 40px);
+        gap: 5px;
+        background-color: #004080;
+        padding: 10px;
+        border: 4px solid #00ffcc;
+        border-radius: 10px;
+        margin-bottom: 30px;
+      }
 
-        .fade-out {
-            animation: fadeOut 1s forwards;
-        }
+      .tile {
+        width: 40px;
+        height: 40px;
+        background-color: #001144;
+        color: #ffff66;
+        font-size: 24px;
+        line-height: 40px;
+        border: 2px solid #00ffcc;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
 
-        @keyframes fadeOut {
-            to { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+      .tile.blank {
+        background-color: #000820;
+        border: none;
+      }
+
+      /* Player display */
+      .players {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-bottom: 20px;
+      }
+
+      .player-box {
+        border: 2px solid #00ffcc;
+        background-color: #001144;
+        padding: 10px 15px;
+        width: 180px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px #00ffcc;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .player-active {
+        border-color: #ffff66;
+        background-color: #002266;
+        box-shadow: 0 0 20px #ffff66;
+        transform: scale(1.05);
+      }
+
+      .player-box strong {
+        display: block;
+        color: #00ffcc;
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+
+      .player-money {
+        font-size: 18px;
+        color: #ffff66;
+      }
+
+      .controls {
+        margin-top: 20px;
+      }
+
+      button, input[type="text"] {
+        background-color: #00ffcc;
+        border: none;
+        padding: 10px 12px;
+        margin: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      button[disabled] {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      .info {
+        margin-top: 30px;
+        font-size: 18px;
+      }
+
+      .category {
+        font-size: 22px;
+        color: #ffff66;
+        margin-bottom: 10px;
+      }
+
+      .game-alert {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(circle at top, #ff0040, #990022);
+        border: 4px solid #ffff66;
+        color: #fff;
+        font-size: 26px;
+        font-weight: bold;
+        padding: 20px 40px;
+        border-radius: 15px;
+        box-shadow: 0 0 25px #ff0066, 0 0 50px #ffff66;
+        z-index: 9999;
+        animation: popIn 0.4s ease forwards;
+      }
+
+      @keyframes popIn {
+        from {
+          transform: translate(-50%, -50%) scale(0);
+          opacity: 0;
         }
+        to {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+      }
+
+      .fade-out {
+        animation: fadeOut 1s forwards;
+      }
+
+      @keyframes fadeOut {
+        to {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.9);
+        }
+      }
+
+      .phase-banner {
+        margin-bottom: 10px;
+        font-size: 20px;
+        color: #00ffcc;
+      }
     </style>
-</head>
-<body>
-
-<div class="ad-column">
-    <div class="ad-frame">
-      <img id="leftAd" src="{{ url_for('static', filename='images/ads/ad1.png') }}" alt="Ad">
+  </head>
+  <body>
+    <!-- Left Ad -->
+    <div class="ad-column">
+      <div class="ad-frame" id="leftAdFrame">
+        <img
+          id="leftAd"
+          src="{{ url_for('static', filename='images/ads/ad1.png') }}"
+          alt="Ad"
+        />
+      </div>
     </div>
-  </div>
 
-  <div class="main-content">
+    <!-- Main Game Area -->
+    <div class="main-content">
+      <!-- Flash Message -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div id="gameAlert" class="game-alert">{{ message }}</div>
+            <script>
+              setTimeout(() => {
+                const alertBox = document.getElementById("gameAlert");
+                if (alertBox) {
+                  alertBox.classList.add("fade-out");
+                  setTimeout(() => alertBox.remove(), 1000);
+                }
+              }, 2000);
+            </script>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-   {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div id="gameAlert" class="game-alert">
-            {{ message }}
+      <h1>WHEEL OF FORTUNE</h1>
+
+      <div class="phase-banner">
+        {% if phase == 'tossup' %}
+          TOSS-UP ROUND {% if tossup_stage == 'end' %}(FINAL TOSS-UP — decides bonus){% endif %}
+        {% elif phase == 'main' %}
+          MAIN ROUND (Spins completed: {{ session.get('spin_rounds_completed', 0) }})
+        {% elif phase == 'bonus' %}
+          BONUS ROUND: {{ session.get('bonus_player') }}
+        {% endif %}
+      </div>
+
+      <!-- Player Display -->
+      <div class="players">
+        {% for p in players %}
+        <div
+          class="player-box {% if loop.index0 == current_player %}player-active{% endif %}"
+        >
+          <strong>{{ p }}</strong>
+          <div class="player-money">
+            ${{ player_money[loop.index0] if player_money and loop.index0 < player_money|length else 0 }}
           </div>
-          <script>
-            setTimeout(() => {
-              const alertBox = document.getElementById('gameAlert');
-              alertBox.classList.add('fade-out');
-              setTimeout(() => alertBox.remove(), 1000);
-            }, 2000); // fade after 2 seconds
-          </script>
+        </div>
         {% endfor %}
-      {% endif %}
-    {% endwith %}
+      </div>
 
+      <div class="category">Category: {{ category }}</div>
 
-    <h1>WHEEL OF FORTUNE</h1>
-
-    <div class="category">Category: {{ category }}</div>
-
-
-    <div class="board">
+      <div class="board">
         {% for c in revealed %}
-            {% if c == ' ' %}
-                <div class="tile blank"></div>
-            {% elif c == '_' %}
-                <div class="tile" style="color:#005577;">_</div>
-            {% else %}
-                <div class="tile">{{ c }}</div>
-            {% endif %}
+          {% if c == ' ' %}
+            <div class="tile blank"></div>
+          {% elif c == '_' %}
+            <div class="tile" style="color: #005577">_</div>
+          {% else %}
+            <div class="tile">{{ c }}</div>
+          {% endif %}
         {% endfor %}
-    </div>
+      </div>
 
-
-    <form action="/guess" method="POST">
-        <input type="text" name="letter" maxlength="1" placeholder="Enter a consonant" required>
-        <button type="submit">Guess</button>
-    </form>
-
-    <div class="controls">
-        <a href="/wheel"><button>SPIN</button></a>
-        <form action="/buy_vowel" method="POST" style="display:inline;">
-            <input type="text" name="vowel" maxlength="1" placeholder="Buy a vowel (A, E, I, O, U)" required>
-            <button type="submit">BUY VOWEL</button>
+      {% if phase == 'tossup' %}
+        <!-- Tossup controls: first guess a letter, then solve -->
+        <form action="/tossup_guess" method="POST" style="display:inline-block; margin-bottom:8px;">
+          <input type="text" name="letter" maxlength="1" placeholder="Toss-up letter" required />
+          <button type="submit">GUESS LETTER</button>
         </form>
-        <form action="/solve" method="POST" style="display:inline;">
-            <input type="text" name="guess" placeholder="Solve the puzzle" required>
-            <button type="submit">SOLVE</button>
+
+        <form action="/tossup_solve" method="POST" style="display:inline-block; margin-bottom:8px;">
+          <input type="text" name="guess" placeholder="Try to solve toss-up" required />
+          <button type="submit">SOLVE TOSS-UP</button>
         </form>
+
+        <div style="margin-top:8px; font-size:14px; color:#aaddff;">
+          {% if awaiting_tossup_solve %}
+            You guessed a correct letter — you may attempt to solve (use Solve form).
+          {% else %}
+            Players take turns guessing a letter; if correct you may solve.
+          {% endif %}
+        </div>
+      {% else %}
+        <!-- Main round controls -->
+        <form action="/guess" method="POST" style="display:inline-block;">
+          <input type="text" name="letter" maxlength="1" placeholder="Enter a consonant" required />
+          <button type="submit">Guess</button>
+        </form>
+
+        <form action="/buy_vowel" method="POST" style="display:inline-block;">
+          <input type="text" name="vowel" maxlength="1" placeholder="Buy a vowel (A,E,I,O,U)" required />
+          <button type="submit">Buy Vowel</button>
+        </form>
+
+        <form action="/solve" method="POST" style="display:inline-block;">
+          <input type="text" name="guess" placeholder="Solve the puzzle" required />
+          <button type="submit">Solve</button>
+        </form>
+      {% endif %}
+
+      <div class="controls">
+        <!-- Spin should be disabled during toss-up -->
+        <a href="/wheel"><button {% if phase == 'tossup' %}disabled{% endif %}>SPIN</button></a>
+        <a href="/new_puzzle"><button {% if phase != 'main' %}disabled{% endif %}>NEW PUZZLE (admin)</button></a>
+      </div>
+
+      <div class="info">Round: {{ round }}</div>
     </div>
 
-    <div class="info">
-        Round: {{ round }} | Player: {{ player }} | ${{ money }}
+    <!-- Right Ad -->
+    <div class="ad-column">
+      <div class="ad-frame" id="rightAdFrame">
+        <img
+          id="rightAd"
+          src="{{ url_for('static', filename='images/ads/ad6.png') }}"
+          alt="Ad"
+        />
+      </div>
     </div>
-</div>
 
-<div class="ad-column">
-    <div class="ad-frame">
-      <img id="rightAd" src="{{ url_for('static', filename='images/ads/ad6.png') }}" alt="Ad">
-    </div>
-  </div>
+    <script>
+      // ad cycling (same as before)
+      const leftAd = document.getElementById("leftAd");
+      const rightAd = document.getElementById("rightAd");
 
- <script>
-  const leftAd = document.getElementById('leftAd');
-  const rightAd = document.getElementById('rightAd');
+      const ads = [
+        "{{ url_for('static', filename='images/ads/ad1.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad2.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad3.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad4.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad5.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad6.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad7.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad8.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad9.jpg') }}",
+        "{{ url_for('static', filename='images/ads/ad10.jpg') }}"
+      ];
 
-  const ads = [
-    "{{ url_for('static', filename='images/ads/ad1.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad2.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad3.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad4.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad5.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad6.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad7.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad8.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad9.jpg') }}",
-    "{{ url_for('static', filename='images/ads/ad10.jpg') }}"
-  ];
+      let leftIndex = 0;
+      let rightIndex = Math.floor(ads.length / 2);
 
-  let leftIndex = 0;
-  let rightIndex = Math.floor(ads.length / 2);
+      function cycleAds() {
+        leftAd.style.opacity = 0;
+        rightAd.style.opacity = 0;
 
-  function cycleAds() {
-    leftAd.style.opacity = 0;
-    rightAd.style.opacity = 0;
+        setTimeout(() => {
+          leftIndex = (leftIndex + 1) % ads.length;
+          rightIndex = (rightIndex + 1) % ads.length;
 
-    setTimeout(() => {
-      leftIndex = (leftIndex + 1) % ads.length;
-      rightIndex = (rightIndex + 1) % ads.length;
+          leftAd.src = ads[leftIndex];
+          rightAd.src = ads[rightIndex];
 
-      leftAd.src = ads[leftIndex];
-      rightAd.src = ads[rightIndex];
+          leftAd.style.opacity = 1;
+          rightAd.style.opacity = 1;
+        }, 600);
+      }
 
-      leftAd.style.opacity = 1;
-      rightAd.style.opacity = 1;
-    }, 600);
-  }
-
-  
-  leftAd.src = ads[leftIndex];
-  rightAd.src = ads[rightIndex];
-
-  setInterval(cycleAds, 4000);
-</script>
-</body>
+      setInterval(cycleAds, 4000);
+    </script>
+  </body>
 </html>
